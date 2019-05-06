@@ -20,11 +20,6 @@ __attribute__((section("__versions"))) = {
 	{ 0xb79dfee1, "module_layout" },
 	{ 0xd0d8621b, "strlen" },
 	{ 0x7a2255dd, "per_cpu__current_task" },
-	{ 0xfda85a7d, "request_threaded_irq" },
-	{ 0xf20dabd8, "free_irq" },
-	{ 0x86b82836, "create_proc_entry" },
-	{ 0xe007de41, "kallsyms_lookup_name" },
-	{ 0x6644f130, "remove_proc_entry" },
 	{ 0xb72397d5, "printk" },
 };
 

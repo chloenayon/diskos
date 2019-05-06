@@ -1,0 +1,1 @@
+cmd_/root/diskOs/keyboard_driver.ko := ld -r -m elf_i386 -T /usr/src/linux-2.6.33.2/scripts/module-common.lds --build-id -o /root/diskOs/keyboard_driver.ko /root/diskOs/keyboard_driver.o /root/diskOs/keyboard_driver.mod.o
