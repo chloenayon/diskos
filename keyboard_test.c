@@ -1,22 +1,23 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>		/* open */
-#include <sys/ioctl.h>		/* ioctl */
+#include <fcntl.h>
+#include <sys/ioctl.h>
 
-#define IOCTL_TEST _IOR(0,6,char*)
+#define IOCTL_TEST _IOW(0, 6, struct ioctl_test_t)
 
-int main()
-{
-   int file_desc;
-   char message[10] = "\0";
-   file_desc = open("/proc/keyboard_driver", O_RDONLY);
-   while(1)
-   {
-   sleep(1);
-   ioctl(file_desc,IOCTL_TEST,message);
-   if(message[1]!='$')
-   {
-   printf("%c",message[0]);
-   }
-   }
+int main () {
+
+  /* attribute structures */
+  struct ioctl_test_t {
+    int field1;
+    char field2;
+  } ioctl_test;
+
+  int fd = open ("/proc/ioctl_test", O_RDONLY);
+
+  ioctl_test.field1 = 10;
+  ioctl_test.field2 = 'a';
+
+  ioctl (fd, IOCTL_TEST, &ioctl_test);
+
+  return 0;
 }

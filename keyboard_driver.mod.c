@@ -18,8 +18,11 @@ static const struct modversion_info ____versions[]
 __used
 __attribute__((section("__versions"))) = {
 	{ 0xb79dfee1, "module_layout" },
+	{ 0x362ef408, "_copy_from_user" },
 	{ 0xd0d8621b, "strlen" },
 	{ 0x7a2255dd, "per_cpu__current_task" },
+	{ 0x86b82836, "create_proc_entry" },
+	{ 0x6644f130, "remove_proc_entry" },
 	{ 0xb72397d5, "printk" },
 };
 

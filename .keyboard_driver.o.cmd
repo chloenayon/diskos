@@ -596,34 +596,6 @@ deps_/root/diskOs/keyboard_driver.o := \
   include/linux/aio.h \
   include/linux/aio_abi.h \
   include/linux/uio.h \
-  include/linux/interrupt.h \
-    $(wildcard include/config/generic/irq/probe.h) \
-  include/linux/irqreturn.h \
-  include/linux/irqnr.h \
-  include/linux/hardirq.h \
-  include/linux/ftrace_irq.h \
-    $(wildcard include/config/ftrace/nmi/enter.h) \
-  /usr/src/linux-2.6.33.2/arch/x86/include/asm/hardirq.h \
-    $(wildcard include/config/x86/thermal/vector.h) \
-    $(wildcard include/config/x86/mce/threshold.h) \
-  include/linux/irq.h \
-    $(wildcard include/config/s390.h) \
-    $(wildcard include/config/irq/per/cpu.h) \
-    $(wildcard include/config/irq/release/method.h) \
-    $(wildcard include/config/intr/remap.h) \
-    $(wildcard include/config/generic/pending/irq.h) \
-    $(wildcard include/config/numa/irq/desc.h) \
-    $(wildcard include/config/generic/hardirqs/no//do/irq.h) \
-    $(wildcard include/config/cpumasks/offstack.h) \
-  /usr/src/linux-2.6.33.2/arch/x86/include/asm/irq.h \
-  /usr/src/linux-2.6.33.2/arch/x86/include/asm/irq_regs.h \
-  /usr/src/linux-2.6.33.2/arch/x86/include/asm/hw_irq.h \
-  include/linux/profile.h \
-    $(wildcard include/config/profiling.h) \
-  /usr/src/linux-2.6.33.2/arch/x86/include/asm/sections.h \
-    $(wildcard include/config/debug/rodata.h) \
-  include/asm-generic/sections.h \
-  include/linux/kallsyms.h \
 
 /root/diskOs/keyboard_driver.o: $(deps_/root/diskOs/keyboard_driver.o)
 
