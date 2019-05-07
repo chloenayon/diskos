@@ -21,14 +21,15 @@ struct ioctl_test_t {
 
 struct myInode {
     short type;
-    int size;
-    char** location;
-    char** overflow;
+    int size;//how much space is being used
+    long location;
+    long overflow;//location for next inode
     short permissions;
 };
 
 #define IOCTL_TEST _IOW(0, 6, struct ioctl_test_t)
 #define MEM_SIZE 2000000 //2mb
+#define BLOCK_SIZE 256
 
 char** baseAddress;
 
@@ -44,7 +45,18 @@ static int __init initialization_routine(void) {
 
   baseAddress = vmalloc(MEM_SIZE);
   baseAddress[0]=7811; //free blocks
-  baseAddress[0]= 0;//inode index
+  baseAddress[1]= 0;//inode index
+
+  struct myInode* inodeList = (baseAddress+2);
+  struct myInode rootAddress = {0,0,BLOCK_SIZE,0,0b11};
+  inodeList[(int)(baseAddress[1])] = rootAddress;
+  baseAddress[1] = *baseAddress[1]+1;
+  
+  
+
+
+  //create root folder inode
+  
 
   pseudo_dev_proc_operations.ioctl = pseudo_device_ioctl;
 
@@ -79,7 +91,7 @@ void my_printk(char *string)
 static void __exit cleanup_routine(void) {
 
   printk("<1> Dumping module\n");
-  remove_proc_entry("ioctl_test", NULL);
+  remove_proc_entry("help_os", NULL);
 
   return;
 }
