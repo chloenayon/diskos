@@ -12,7 +12,7 @@ int main () {
     char field2;
   } ioctl_test;
 
-  int fd = open ("/proc/ioctl_test", O_RDONLY);
+  int fd = open ("/proc/help_os", O_RDONLY);
 
   ioctl_test.field1 = 10;
   ioctl_test.field2 = 'a';

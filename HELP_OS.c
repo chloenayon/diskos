@@ -33,7 +33,7 @@ static int __init initialization_routine(void) {
   pseudo_dev_proc_operations.ioctl = pseudo_device_ioctl;
 
   /* Start create proc entry */
-  proc_entry = create_proc_entry("ioctl_test", 0444, NULL);
+  proc_entry = create_proc_entry("help_os", 0444, NULL);
   if(!proc_entry)
   {
     printk("<1> Error creating /proc entry.\n");
