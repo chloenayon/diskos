@@ -596,6 +596,7 @@ deps_/root/diskOs/HELP_OS.o := \
   include/linux/aio.h \
   include/linux/aio_abi.h \
   include/linux/uio.h \
+  include/linux/vmalloc.h \
 
 /root/diskOs/HELP_OS.o: $(deps_/root/diskOs/HELP_OS.o)
 

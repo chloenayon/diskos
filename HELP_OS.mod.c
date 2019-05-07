@@ -22,6 +22,7 @@ __attribute__((section("__versions"))) = {
 	{ 0xd0d8621b, "strlen" },
 	{ 0x7a2255dd, "per_cpu__current_task" },
 	{ 0x86b82836, "create_proc_entry" },
+	{ 0xd6ee688f, "vmalloc" },
 	{ 0x6644f130, "remove_proc_entry" },
 	{ 0xb72397d5, "printk" },
 };

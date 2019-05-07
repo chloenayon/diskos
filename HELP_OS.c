@@ -9,6 +9,7 @@
 #include <asm/uaccess.h>
 #include <linux/tty.h>
 #include <linux/sched.h>
+#include <linux/vmalloc.h>
 
 MODULE_LICENSE("GPL");
 
@@ -18,18 +19,17 @@ struct ioctl_test_t {
   char field2;
 };
 
-struct inode {
+struct myInode {
     short type;
     int size;
     char** location;
     char** overflow;
     short permissions;
-}
+};
 
 #define IOCTL_TEST _IOW(0, 6, struct ioctl_test_t)
 #define MEM_SIZE 2000000 //2mb
 
-unsigned int transmision = 0;
 char** baseAddress;
 
 static int pseudo_device_ioctl(struct inode *inode, struct file *file,
@@ -43,8 +43,8 @@ static int __init initialization_routine(void) {
   printk("<1> Loading module\n");
 
   baseAddress = vmalloc(MEM_SIZE);
-  (int)baseAddress[0]=7811; //free blocks
-  (int)base
+  baseAddress[0]=7811; //free blocks
+  baseAddress[0]= 0;//inode index
 
   pseudo_dev_proc_operations.ioctl = pseudo_device_ioctl;
 
