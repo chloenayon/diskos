@@ -158,7 +158,18 @@ void my_strcpy(char *src, char *dest){
   printk("dest is now: %s\n", dest);
 
   return;
+}
 
+int my_strcmp(char *str1, char *str2){
+
+    int i;
+    for (i = 0; (str1[i] != '\0') && (str2[i] != '\0'), i++){
+      if (str1[i] != str2[i]){
+        return -1;
+      }
+    }
+
+  return 0;
 }
 
 /** INIT FUNCTION **/
@@ -172,8 +183,6 @@ static int __init initialization_routine(void) {
 
   // 256 bytes ahead of baseAddress, a.k.a. inode list
   struct myInode *inodeList = (baseAddress+64);  
-  //struct myInode *inodeList = (baseAddress+2);  
-  //struct myInode rootAddress = {0,0,BLOCK_SIZE,0,0b11};
   struct myInode rootAddress = {0,0,BLOCK_SIZE + 5,0,0b11};
   inodeList[(int)(baseAddress[1])] = rootAddress;
   baseAddress[1] = 1;
@@ -229,12 +238,22 @@ void do_ioctl_rd_creat(char *fname, short mode){
       break;
     } else {
 
-      // we are in a superdirectory and must navigate down the filesystem
-      // get inode number of final directory 
-      /*
-      for (){
-        currNode = ;
-      }*/
+      // find corresponding inode of out
+
+      struct dir_entry *entries = baseAddress + (currNode.location * 64);
+
+      int n;
+      int index = 0;
+      for (n = 0; n < inode.size; n += 16){
+        struct dir_entry e = entries[index];
+        printk("filename is: %s and out is: %s\n", e.fname, out);
+        if (strcmp(e.fname, out) == 0){
+          dest = e.inode;
+          currNode = inodeList[dest];
+          break;
+        }
+        index++;
+      }
     }
     printk("dir is: %s\n", out);
   }
