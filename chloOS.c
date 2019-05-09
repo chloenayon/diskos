@@ -141,14 +141,10 @@ int my_strtok(char *string, char *delim, char *dname, int index){
 void my_strcpy(char *src, char *dest){
 
   int i;
-  printk("size of %s is %d\n", src, sizeof(src));
   for (i = 0; src[i] != '\0'; i++){
     dest[i] = src[i];
   }
-
   dest[i] = '\0';
-
-  printk("dest is now: %s\n", dest);
 
   return;
 }
@@ -157,19 +153,16 @@ void my_strcpy(char *src, char *dest){
 
 int my_strcmp(char *str1, char *str2){
 
-    printk("STRCMP: %s and %s\n", str1, str2);
-
     int i;
     for (i = 0; (str1[i] != '\0') && (str2[i] != '\0'); i++){
-
-      printk("compare %c and %c\n", str1[i], str2[i]);
-
       if (str1[i] != str2[i]){
         return -1;
       }
     }
 
-  printk("THEY ARE THE SAME!\n");
+    if (str1[i] != str2[i]){
+      return -1;
+    }
   return 0;
 }
 
@@ -234,6 +227,8 @@ int find_inode(struct myInode currNode, char *filename){
 
 int do_ioctl_rd_creat(char *fname, short mode){
 
+  printk("Attempting to create file %s\n", fname);
+
   // get root node 
   struct myInode *inodeList = (baseAddress+64);
   struct myInode currNode = inodeList[0];
@@ -249,6 +244,7 @@ int do_ioctl_rd_creat(char *fname, short mode){
 
   while (index != -1){
     index = my_strtok(pname, d, out, index);
+    printk("INSERTING FNAME %s: ON %s with index %d\n", fname, out, index);
     if (index == -1){
       if (find_inode(currNode, out) != -1){
         my_printk("Error: File already exists!\n");
@@ -263,7 +259,6 @@ int do_ioctl_rd_creat(char *fname, short mode){
         return -1;
       } else {
         currNode = inodeList[dest];
-        break;
       }
     }
     printk("dir is: %s\n", out);
@@ -287,12 +282,16 @@ int do_ioctl_rd_creat(char *fname, short mode){
   baseAddress[1] = (int)(baseAddress[1]) + 1; 
   baseAddress[0] = (int)(baseAddress[0]) - 1;
 
+  printk("Successfully added %s\n", fname);
+
   filesystem();
 
   return 0;
 }
 
 int do_ioctl_rd_mkdir(char *fname){
+
+   printk("Attempting to make directory %s\n", fname);
 
   // get root node 
   struct myInode *inodeList = (baseAddress+64);
@@ -311,7 +310,7 @@ int do_ioctl_rd_mkdir(char *fname){
     index = my_strtok(pname, d, out, index);
     if (index == -1){
       if (find_inode(currNode, out) != -1){
-        my_printk("Error: File already exists!\n");
+        my_printk("Error: Directory already exists!\n");
         return -1;
       }
       break;
@@ -322,13 +321,12 @@ int do_ioctl_rd_mkdir(char *fname){
         return -1;
       } else {
         currNode = inodeList[dest];
-        break;
       }
     }
-    printk("dir is: %s\n", out);
+    //printk("dir is: %s\n", out);
   }
   
-  printk("final file is %s\n", out);
+  //printk("final file is %s\n", out);
 
   struct dir_entry *entries = baseAddress + (currNode.location * 64);
   int blocknum = BLOCK_SIZE + 5 + (int)(baseAddress[1]);
@@ -343,6 +341,8 @@ int do_ioctl_rd_mkdir(char *fname){
   inodeList[dest].size = inodeList[dest].size + 16;
   baseAddress[1] = (int)(baseAddress[1]) + 1; 
   baseAddress[0] = (int)(baseAddress[0]) - 1;
+
+  printk("Successfully created directory %s\n", fname);
 
   filesystem();
 

@@ -45,5 +45,11 @@ int main () {
 
   ioctl(fd, IOCTL_RD_CREAT, &nfile);
 
+  struct rd_creat err;
+  err.pathname = "/usr/src/foo.txt";
+  err.mode = 0b11;
+
+  ioctl(fd, IOCTL_RD_CREAT, &err);
+
   return 0;
 }
