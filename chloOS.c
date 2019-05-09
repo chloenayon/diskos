@@ -37,7 +37,7 @@ struct rd_creat {
 // Entries in a database file; 14-byte filename and 2-byte inode number
 // 16 bytes
 struct dir_entry { 
-    char fname[14];
+    char *fname[14];
     short inode;
 };
 
@@ -49,7 +49,7 @@ struct dir_entry {
 #define MEM_SIZE 2000000 //2mb
 #define BLOCK_SIZE 256
 
-char** baseAddress;
+int** baseAddress;
 
 static int pseudo_device_ioctl(struct inode *inode, struct file *file,
 			       unsigned int cmd, unsigned long arg);
@@ -73,32 +73,30 @@ void filesystem(){
   for (x = 0; x < inodes; x++){
     struct myInode inode = inodeList[x];
     printk("Inode %d: Type is %d; Size is %d, Location is %d\n", x, inode.type, inode.size, inode.location);
+
+    struct dir_entry *entries = baseAddress + (inode.location * 64);
+
+    int n;
+    int index = 0;
+    for (n = 0; n < inode.size; n += 16){
+      struct dir_entry e = entries[index];
+      printk("address of entry is: %p\n",(void*)&entries[index]);
+      printk("filename is: %s\n", e.fname);
+      index++;
+    }
+
   }
 
+  /*
   int count = rootNode.size / 16;
   int i;
 
-  for (i = 0; i < count; i++){
+  for (i = 0; i <= count; i++){
     struct dir_entry e = entries[i];
     printk("/%s\n", e.fname);
   }
-  /*
-  inodeList[0] 
-  
-  printk("A\n");
-  // calculate beginning of filespace, add number of used blocks to get next free
-  int blocknum = BLOCK_SIZE + 4 + (int)(baseAddress[1]);
-  printk("B\n");
-  struct myInode newNode = {0, 0, blocknum, 0, mode};
-  inodeList[(int)(baseAddress[1])] = newNode;
-  struct dir_entry entry = {fname, (int)(baseAddress[1])};
-  printk("C\n");
-  // increment inode count, decrease free # of inodes
-  baseAddress[1] = (int)(baseAddress[1]) + 1; 
-  printk("D\n");
-  baseAddress[0] = (int)(baseAddress[0]) - 1;
-  printk("E\n");
   */
+
  return;
 }
 
@@ -115,6 +113,7 @@ void my_printk(char *string)
   }
 } 
 
+/* modified strtok */
 int my_strtok(char *string, char *delim, char *dname, int index){
 
   if (string[0] != '/'){
@@ -142,6 +141,24 @@ int my_strtok(char *string, char *delim, char *dname, int index){
   }
 
   return i + 1;
+}
+
+/* modified strcpy */
+
+void my_strcpy(char *src, char *dest){
+
+  int i;
+  printk("size of %s is %d\n", src, sizeof(src));
+  for (i = 0; src[i] != '\0'; i++){
+    dest[i] = src[i];
+  }
+
+  dest[i] = '\0';
+
+  printk("dest is now: %s\n", dest);
+
+  return;
+
 }
 
 /** INIT FUNCTION **/
@@ -193,11 +210,15 @@ static void __exit cleanup_routine(void) {
 void do_ioctl_rd_creat(char *fname, short mode){
 
   // get root node 
-  struct myInode *currNode = baseAddress+64; 
+  struct myInode *inodeList = (baseAddress+64);
+  struct myInode currNode = inodeList[0];
+  // inode number of destination inode
+  int dest = 0;
 
   // iterate over filesystem
   char *pname = fname;
   char *d = "/";
+  // NO vmalloc
   char *out = vmalloc(sizeof(pname));
   int index = 1;
 
@@ -207,7 +228,9 @@ void do_ioctl_rd_creat(char *fname, short mode){
      // we are in the directory that the file needs to be inserted in
       break;
     } else {
+
       // we are in a superdirectory and must navigate down the filesystem
+      // get inode number of final directory 
       /*
       for (){
         currNode = ;
@@ -219,27 +242,26 @@ void do_ioctl_rd_creat(char *fname, short mode){
   printk("final file is %s\n", out);
 
   // create dir entry in the directory, insert inode in inode list, decrement available blocks, increase inode index, set block bitmap
-  struct myInode *inodeList = (baseAddress+64);
-  struct myInode rootNode = inodeList[0];
 
   // math not great here
-  struct dir_entry *newEntry = baseAddress + (rootNode.location * 64) + rootNode.size;
-  printk("A\n");
+  struct dir_entry *entries = baseAddress + (currNode.location * 64);
+
+  //struct dir_entry *newEntry = baseAddress + (currNode.location * 64) + rootNode.size;
   // calculate beginning of filespace, add number of used blocks to get next free
   int blocknum = BLOCK_SIZE + 5 + (int)(baseAddress[1]);
-  printk("B\n");
-  struct myInode newNode = {0, 0, blocknum, 0, mode};
+  struct myInode newNode = {1, 0, blocknum, 0, mode};
   inodeList[(int)(baseAddress[1])] = newNode;
-  struct dir_entry e = {fname, (int)(baseAddress[1])};
-  rootNode.size += 16;
-  newEntry[0] = e;
-  printk("C\n");
-  // increment inode count, decrease free # of inodes
-  baseAddress[1] = (int)(baseAddress[1]) + 1; 
-  printk("D\n");
-  baseAddress[0] = (int)(baseAddress[0]) - 1;
-  printk("E\n");
+  struct dir_entry e;
+  my_strcpy(out, e.fname);
+  e.inode = (int)(baseAddress[1]);
+  // = {fname, (int)(baseAddress[1])};
+  entries[(currNode.size/16)] = e;
 
+  printk("inserting at %p\n",(void*)&entries[0]);
+
+  inodeList[dest].size = inodeList[dest].size + 16;
+  baseAddress[1] = (int)(baseAddress[1]) + 1; 
+  baseAddress[0] = (int)(baseAddress[0]) - 1;
 
   return;
 }
@@ -265,21 +287,12 @@ static int pseudo_device_ioctl(struct inode *inode, struct file *file,
     break;
 
   case IOCTL_RD_CREAT:
-
-    my_printk("HERE\n");
-
+  
     copy_from_user(&rc, (struct rd_creat *)arg, 
         sizeof(struct rd_creat));
     printk("<1> CALL TO IOCTL!! Pathname is %s\n", rc.pathname);
 
     do_ioctl_rd_creat(rc.pathname, rc.mode);
-
-    /*
-    printk("size of inode is: %d\n", sizeof(struct myInode));
-    printk("size of dir_entry is: %d\n", sizeof(struct dir_entry));
-    */
-
-    my_printk ("Got msg in kernel\n");
 
     filesystem();
 
