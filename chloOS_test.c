@@ -20,7 +20,7 @@ int main () {
 
   int fd = open ("/proc/help_os", O_RDONLY);
 
-  rd_creat.pathname = "/usr/chlonk/file.txt";
+  rd_creat.pathname = "/file.txt";
   rd_creat.mode = 0b11;
 
   short x = 2;
