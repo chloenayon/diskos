@@ -45,11 +45,18 @@ struct rd_mkdir {
     char *pathname;
 } rd_mkdir;
 
+struct rd_read {
+    int fd;
+    char *address;
+    int num_bytes;
+} rd_read;
+
 /* protocols, global vars, etc */
 
 #define IOCTL_TEST _IOW(0, 6, struct ioctl_test_t)
 #define IOCTL_RD_CREAT _IOW(1, 6, struct rd_creat)
 #define IOCTL_RD_MKDIR _IOW(2, 6, struct rd_mkdir)
+#define IOCTL_RD_READ _IOR(3, 6, struct rd_read)
 
 #define MEM_SIZE 2000000 //2mb
 #define BLOCK_SIZE 256
@@ -91,6 +98,12 @@ void filesystem(){
     }
   }
  return;
+}
+
+void set_bitmap(int block){
+  char *bitmap = baseAddress + (257 * 64);
+  bitmap[block] = 0xA | bitmap[block];
+  return;
 }
 
 /* 'printk' version that prints to active tty. */
@@ -178,6 +191,7 @@ static int __init initialization_routine(void) {
   // 256 bytes ahead of baseAddress, a.k.a. inode list
   struct myInode *inodeList = (baseAddress+64);  
   struct myInode rootAddress = {0,0,BLOCK_SIZE + 5,0,0b11};
+  set_bitmap(0);
   inodeList[(int)(baseAddress[1])] = rootAddress;
   baseAddress[1] = 1;
   baseAddress[0] = (int)(baseAddress[1]) - 1;
@@ -217,7 +231,6 @@ int find_inode(struct myInode currNode, char *filename){
     struct dir_entry e = entries[index];
     printk("COMPARE: filename is: %s and out is: %s\n", e.fname, filename);
     if (my_strcmp(e.fname, filename) == 0){
-      printk("YES IT EXISTS!\n");
       return e.inode;
     }
     index++;
@@ -254,7 +267,6 @@ int do_ioctl_rd_creat(char *fname, short mode){
     } else {
       dest = find_inode(currNode, out);
       if (dest == -1){
-        printk("Error! Seeking %s, but doesn't exist!\n", out);
         my_printk("Error: Directory does not exist!\n");
         return -1;
       } else {
@@ -271,6 +283,7 @@ int do_ioctl_rd_creat(char *fname, short mode){
 
   int blocknum = BLOCK_SIZE + 5 + (int)(baseAddress[1]);
   struct myInode newNode = {1, 0, blocknum, 0, mode};
+  set_bitmap(blocknum);
   inodeList[(int)(baseAddress[1])] = newNode;
 
   struct dir_entry e;
@@ -331,6 +344,7 @@ int do_ioctl_rd_mkdir(char *fname){
   struct dir_entry *entries = baseAddress + (currNode.location * 64);
   int blocknum = BLOCK_SIZE + 5 + (int)(baseAddress[1]);
   struct myInode newNode = {0, 0, blocknum, 0, 0b11};
+  set_bitmap(0);
   inodeList[(int)(baseAddress[1])] = newNode;
 
   struct dir_entry e;

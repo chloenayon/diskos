@@ -5,6 +5,7 @@
 #define IOCTL_TEST _IOW(0, 6, struct ioctl_test_t)
 #define IOCTL_RD_CREAT _IOW(1, 6, struct rd_creat)
 #define IOCTL_RD_MKDIR _IOW(2, 6, struct rd_mkdir)
+#define IOCTL_RD_READ _IOR(3, 6, struct rd_read)
 
 int main () {
 
@@ -22,6 +23,12 @@ int main () {
   struct rd_mkdir {
     char *pathname;
   } rd_mkdir;
+
+  struct rd_read {
+    int fd;
+    char *address;
+    int num_bytes;
+  } rd_read;
 
   int fd = open ("/proc/help_os", O_RDONLY);
 
