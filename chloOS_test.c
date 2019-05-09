@@ -4,6 +4,7 @@
 
 #define IOCTL_TEST _IOW(0, 6, struct ioctl_test_t)
 #define IOCTL_RD_CREAT _IOW(1, 6, struct rd_creat)
+#define IOCTL_RD_MKDIR _IOW(2, 6, struct rd_mkdir)
 
 int main () {
 
@@ -18,17 +19,31 @@ int main () {
     short mode;
   } rd_creat;
 
+  struct rd_mkdir {
+    char *pathname;
+  } rd_mkdir;
+
   int fd = open ("/proc/help_os", O_RDONLY);
 
   rd_creat.pathname = "/file.txt";
   rd_creat.mode = 0b11;
 
-  short x = 2;
-  char c[14] = "hello world";
-
-  printf("size of string is %d\n", sizeof(c));
-
   ioctl (fd, IOCTL_RD_CREAT, &rd_creat);
+
+  struct rd_creat newfile;
+  newfile.pathname = "/helpOS.txt";
+  newfile.mode = 0b11;
+
+  ioctl(fd, IOCTL_RD_CREAT, &newfile);
+
+  rd_mkdir.pathname= "/usr";
+  ioctl(fd, IOCTL_RD_MKDIR, &rd_mkdir);
+
+  struct rd_creat nfile;
+  nfile.pathname = "/usr/foo.txt";
+  nfile.mode = 0b11;
+
+  ioctl(fd, IOCTL_RD_CREAT, &nfile);
 
   return 0;
 }
